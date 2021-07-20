@@ -53,12 +53,23 @@ bc.census.data<-list_census_vectors("CA16","region"=="59")
 # Read in the .shp for Canada census divisions data:
 cen.divs.shp <-st_read("/Users/shannonspragg/ONA_GRIZZ/CAN Spatial Data/census divisions_can/lcd_000b16a_e.shp")
 
+# I found the .shp for Canada Ag Regions!! Read in Below:
+can.ag.regions.shp<-st_read("/Users/shannonspragg/ONA_GRIZZ/CAN Spatial Data/CAN census Ag Regions/lcar000b16a_e.shp")
+
 # Make sure it is an sf object
 cd.sf<- as(cen.divs.shp, "sf")
-bc.ab.cen.divs<-cd.sf %>%
-  filter(., PRNAME == "British Columbia" | PRNAME == "Alberta") %>%
+unique(cd.sf$PRNAME) # Shows that the name for BC is "British Columbia / Colombie-Britannique"
+# Filter down to only British Columbia
+bc.cen.divs<-cd.sf %>%
+  filter(., PRNAME == "British Columbia / Colombie-Britannique") %>%
   st_make_valid()
-# This is somehow only returning alberta stuff...
+
+# Make sf and filter down to only British Columbia for Ag Regions:
+can.ag.reg.sf<- as(can.ag.regions.shp, "sf")
+unique(can.ag.reg.sf$PRNAME) # Shows that the name for BC is "British Columbia / Colombie-Britannique"
+bc.ag.regs<-can.ag.reg.sf %>%
+  filter(., PRNAME == "British Columbia / Colombie-Britannique") %>%
+  st_make_valid()
 
 # Spatialize the Ag Files -------------------------------------------------
 
@@ -71,5 +82,6 @@ bees.bc <- bees %>% filter(grepl("British Columbia", GEO))
 land.prac.bc <- land.practice %>% filter(grepl("British Columbia", GEO)) 
 
 # Join the BC Census Districts with Ag Files:
-
-
+# NEED HELP!
+farm.type.join <- merge(bc.ag.regs, farm.type.bc, by.x = "PRUID", by.y = "GEO")
+# Not sure how to complete this join because the column names are different...
