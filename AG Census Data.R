@@ -80,8 +80,36 @@ land.use.bc <- land.use %>% filter(grepl("British Columbia", GEO))
 fruits.nuts.bc <- fruits.n.nuts %>% filter(grepl("British Columbia", GEO)) 
 bees.bc <- bees %>% filter(grepl("British Columbia", GEO)) 
 land.prac.bc <- land.practice %>% filter(grepl("British Columbia", GEO)) 
+write.csv(farm.type.bc, "farm_type_bc.csv")
+
+
+# Dividing the Geocode into 3 Columns -------------------------------------
+# Need to split the GEO column field into 3 columns: place name, province, and geocode
+# Also need to drop the brackets from the geocode using 'gsub'
+install.packages("stringi")
+install.packages("stringr")
+library("stringi")
+library("stringr")
+?gsub
+
+# Trying this with base R, seperating based on a space (if possible)
+# data.frame(do.call("rbind", strsplit(as.character(data$x), "-", fixed = TRUE)))
+data.frame(do.call("rbind", strsplit(as.character(farm.type.bc$GEO), ",", fixed = TRUE)))
+# Yikes, this divided all of them by anything with a space between it
+
+# Try this with stringr:
+#str_split_fixed(data$x, "-", 2)
+str_split_fixed(farm.type.bc, ",", 2)
+
+# Filtering to just the BC regions with a CARxxx number:
+bc.farm.filter<-farm.type.bc %>%
+  filter(., grepl("*CAR59*", farm.type.bc$GEO))
+write_csv(bc.farm.filter, "bc_farms_filtered.csv")
+
+unique(farm.type.bc$North.American.Industry.Classification.System..NAICS.) # There are 43 unique farm types in BC
 
 # Join the BC Census Districts with Ag Files:
 # NEED HELP!
 farm.type.join <- merge(bc.ag.regs, farm.type.bc, by.x = "PRUID", by.y = "GEO")
 # Not sure how to complete this join because the column names are different...
+
